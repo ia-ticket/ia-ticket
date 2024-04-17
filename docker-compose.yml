@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth
+    ports:
+      - 3000:3000
+    environment:
+      POSTGRES_HOST: postgres-auth
+      POSTGRES_DB: auth
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    depends_on:
+      - postgres-auth
+    networks:
+      - auth-network
+
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    ports:
+      - 5123:5432
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres-auth-db:/var/lib/postgresql/data
+      - ./init-scripts/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql
+    networks:
+      - auth-network
+
+volumes:
+  postgres-auth-db:
+
+networks:
+  auth-network:
