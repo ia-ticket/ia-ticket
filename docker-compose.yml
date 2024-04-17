@@ -32,8 +32,53 @@ services:
     networks:
       - auth-network
 
+  io-service:
+        build:
+          context: ./io-service
+          dockerfile: Dockerfile
+        container_name: io
+        ports:
+            - 5050:5050
+        environment:
+            PGUSER: admin
+            PGPASSWORD: admin
+            PGHOST: db-io
+            PGDATABASE: ticketing_app_db
+            PGPORT: 5432
+        networks:
+            - db-network
+        depends_on:
+            - db-io
+  
+  db-io:
+        image: postgres
+        container_name: db-io
+        environment:
+            POSTGRES_DB: ticketing_app_db
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: admin
+        volumes:
+            - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
+            - postgres-io-db:/var/lib/postgresql/data
+        networks:
+            - db-network
+            - db-admin-io
+  
+  adminer:
+        image: adminer
+        container_name: adminer-io
+        ports:
+            - 8080:8080
+        networks:
+            - db-admin-io
+        depends_on:
+            - db-io
+
 volumes:
   postgres-auth-db:
+  postgres-io-db:
 
 networks:
   auth-network:
+  db-network:
+  db-admin-io:
