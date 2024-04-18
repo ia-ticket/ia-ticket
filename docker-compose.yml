@@ -15,7 +15,8 @@ services:
     depends_on:
       - postgres-auth
     networks:
-      - auth-network
+      - auth-db-network
+      - business-logic-network
 
   postgres-auth:
     image: postgres:15
@@ -30,7 +31,7 @@ services:
       - postgres-auth-db:/var/lib/postgresql/data
       - ./init-scripts/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql
     networks:
-      - auth-network
+      - auth-db-network
 
   io-service:
     build:
@@ -46,7 +47,8 @@ services:
       POSTGRES_PASSWORD: admin
       PGPORT: 5432
     networks:
-      - db-network
+      - io-db-network
+      - business-logic-network
     depends_on:
       - db-io
 
@@ -61,8 +63,8 @@ services:
       - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
       - postgres-io-db:/var/lib/postgresql/data
     networks:
-      - db-network
-      - db-admin-io
+      - io-db-network
+      - io-db-admin-network
 
   adminer:
     image: adminer
@@ -70,15 +72,29 @@ services:
     ports:
       - 8080:8080
     networks:
-      - db-admin-io
+      - io-db-admin-network
     depends_on:
       - db-io
+
+  business-logic-service:
+    build:
+      context: ./business-logic-service
+      dockerfile: Dockerfile
+    container_name: business-logic
+    ports:
+      - 3500:3500
+    networks:
+      - business-logic-network
+    depends_on:
+      - auth-service
+      - io-service
 
 volumes:
   postgres-auth-db:
   postgres-io-db:
 
 networks:
-  auth-network:
-  db-network:
-  db-admin-io:
+  auth-db-network:
+  io-db-network:
+  io-db-admin-network:
+  business-logic-network:
