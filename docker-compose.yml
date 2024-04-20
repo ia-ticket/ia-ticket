@@ -58,7 +58,6 @@ services:
       POSTGRES_DB: ticketing_app_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      PGPORT: 5432
     networks:
       - io-db-network
       - business-logic-network
@@ -73,8 +72,8 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     volumes:
-      - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
       - postgres-io-db:/var/lib/postgresql/data
+      - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
     networks:
       - io-db-network
       - io-db-admin-network
