@@ -1,0 +1,16 @@
+_format_version: "2.1"
+
+services:
+  - name: auth-service
+    url: http://auth:3000/auth
+    routes:
+      - name: auth-service
+        paths:
+          - /auth
+
+  - name: business-logic-service
+    url: http://business-logic:3500
+    routes:
+      - name: business-logic-service
+        paths:
+          - /
