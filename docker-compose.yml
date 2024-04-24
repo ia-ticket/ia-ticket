@@ -24,10 +24,7 @@ services:
       - kong-network
   
   auth-service:
-    image: 127.0.0.1:5000/auth-service
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+    image: vivianapantazica/ia-ticket-auth-service:latest
     ports:
       - 3000:3000
     environment:
@@ -72,10 +69,7 @@ services:
       - auth-db-network
 
   io-service:
-    image: 127.0.0.1:5000/io-service
-    build:
-      context: ./io-service
-      dockerfile: Dockerfile
+    image: vivianapantazica/ia-ticket-io-service:latest
     ports:
       - 5050:5050
     environment:
@@ -115,10 +109,7 @@ services:
       - db-io
 
   business-logic-service:
-    image: 127.0.0.1:5000/business-logic-service
-    build:
-      context: ./business-logic-service
-      dockerfile: Dockerfile
+    image: vivianapantazica/ia-ticket-business-logic-service:latest
     ports:
       - 3500:3500
     networks:
