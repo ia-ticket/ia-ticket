@@ -24,7 +24,7 @@ services:
       - kong-network
   
   auth-service:
-    image: vivianapantazica/ia-ticket-auth-service:latest
+    image: vivianapantazica/ia-ticket-auth-service
     ports:
       - 3000:3000
     environment:
@@ -69,7 +69,7 @@ services:
       - auth-db-network
 
   io-service:
-    image: vivianapantazica/ia-ticket-io-service:latest
+    image: vivianapantazica/ia-ticket-io-service
     ports:
       - 5050:5050
     environment:
@@ -109,7 +109,7 @@ services:
       - db-io
 
   business-logic-service:
-    image: vivianapantazica/ia-ticket-business-logic-service:latest
+    image: vivianapantazica/ia-ticket-business-logic-service
     ports:
       - 3500:3500
     networks:
