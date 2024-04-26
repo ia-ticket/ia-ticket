@@ -2,6 +2,7 @@ version: "3.8"
 services:
   kong:
     image: kong:latest
+    container_name: kong
     volumes:
       - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
     environment:
@@ -22,9 +23,12 @@ services:
         constraints: [node.role == manager]
     networks:
       - kong-network
-  
+
   auth-service:
-    image: vivianapantazica/ia-ticket-auth-service
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth
     ports:
       - 3000:3000
     environment:
@@ -32,9 +36,6 @@ services:
       POSTGRES_DB: auth
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - postgres-auth
     networks:
@@ -44,6 +45,7 @@ services:
 
   postgres-auth:
     image: postgres:15
+    container_name: postgres-auth
     ports:
       - 5123:5432
     environment:
@@ -53,14 +55,12 @@ services:
     volumes:
       - postgres-auth-db:/var/lib/postgresql/data
       - ./init-scripts/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql
-    deploy:
-      placement:
-        constraints: [node.role == manager]
     networks:
       - auth-db-network
 
   pgadmin-auth:
     image: dpage/pgadmin4
+    container_name: pgadmin-auth
     ports:
       - 81:80
     environment:
@@ -72,7 +72,10 @@ services:
       - auth-db-network
 
   io-service:
-    image: vivianapantazica/ia-ticket-io-service
+    build:
+      context: ./io-service
+      dockerfile: Dockerfile
+    container_name: io
     ports:
       - 5050:5050
     environment:
@@ -83,14 +86,12 @@ services:
     networks:
       - io-db-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - db-io
 
   db-io:
     image: postgres
+    container_name: db-io
     environment:
       POSTGRES_DB: ticketing_app_db
       POSTGRES_USER: admin
@@ -98,15 +99,13 @@ services:
     volumes:
       - postgres-io-db:/var/lib/postgresql/data
       - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
-    deploy:
-      placement:
-        constraints: [node.role == manager]
     networks:
       - io-db-network
       - io-db-admin-network
 
   adminer:
     image: adminer
+    container_name: adminer-io
     ports:
       - 8080:8080
     networks:
@@ -115,15 +114,15 @@ services:
       - db-io
 
   business-logic-service:
-    image: vivianapantazica/ia-ticket-business-logic-service
+    build:
+      context: ./business-logic-service
+      dockerfile: Dockerfile
+    container_name: business-logic
     ports:
       - 3500:3500
     networks:
       - kong-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - auth-service
       - io-service

@@ -24,7 +24,11 @@ services:
       - kong-network
   
   auth-service:
-    image: vivianapantazica/ia-ticket-auth-service
+    image: vivianapantazica/ia-ticket-auth-service:initial
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     ports:
       - 3000:3000
     environment:
@@ -32,9 +36,6 @@ services:
       POSTGRES_DB: auth
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - postgres-auth
     networks:
@@ -44,6 +45,12 @@ services:
 
   postgres-auth:
     image: postgres:15
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
     ports:
       - 5123:5432
     environment:
@@ -53,14 +60,15 @@ services:
     volumes:
       - postgres-auth-db:/var/lib/postgresql/data
       - ./init-scripts/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql
-    deploy:
-      placement:
-        constraints: [node.role == manager]
     networks:
       - auth-db-network
 
   pgadmin-auth:
     image: dpage/pgadmin4
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     ports:
       - 81:80
     environment:
@@ -72,7 +80,11 @@ services:
       - auth-db-network
 
   io-service:
-    image: vivianapantazica/ia-ticket-io-service
+    image: vivianapantazica/ia-ticket-io-service:initial
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     ports:
       - 5050:5050
     environment:
@@ -83,14 +95,17 @@ services:
     networks:
       - io-db-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - db-io
 
   db-io:
     image: postgres
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
     environment:
       POSTGRES_DB: ticketing_app_db
       POSTGRES_USER: admin
@@ -98,15 +113,16 @@ services:
     volumes:
       - postgres-io-db:/var/lib/postgresql/data
       - ./init-scripts/create-ticketing-app-db.sql:/docker-entrypoint-initdb.d/create-ticketing-app-db.sql
-    deploy:
-      placement:
-        constraints: [node.role == manager]
     networks:
       - io-db-network
       - io-db-admin-network
 
   adminer:
     image: adminer
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     ports:
       - 8080:8080
     networks:
@@ -115,15 +131,16 @@ services:
       - db-io
 
   business-logic-service:
-    image: vivianapantazica/ia-ticket-business-logic-service
+    image: vivianapantazica/ia-ticket-business-logic-service:initial
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     ports:
       - 3500:3500
     networks:
       - kong-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - auth-service
       - io-service
