@@ -32,9 +32,6 @@ services:
       POSTGRES_DB: auth
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - postgres-auth
     networks:
@@ -83,9 +80,6 @@ services:
     networks:
       - io-db-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - db-io
 
@@ -121,9 +115,6 @@ services:
     networks:
       - kong-network
       - business-logic-network
-    deploy:
-      placement:
-        constraints: [node.role == worker]
     depends_on:
       - auth-service
       - io-service

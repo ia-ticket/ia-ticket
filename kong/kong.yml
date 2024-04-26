@@ -2,14 +2,14 @@ _format_version: "2.1"
 
 services:
   - name: auth-service
-    url: http://ia-ticket_auth-service:3000/auth
+    url: http://auth-service:3000/auth
     routes:
       - name: auth-service
         paths:
           - /auth
 
   - name: business-logic-service
-    url: http://ia-ticket_business-logic-service:3500
+    url: http://business-logic-service:3500
     routes:
       - name: business-logic-service
         paths:
