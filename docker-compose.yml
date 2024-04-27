@@ -120,10 +120,37 @@ services:
     depends_on:
       - auth-service
       - io-service
+  agent:
+    image: portainer/agent:2.11.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+  portainer:
+    image: portainer/portainer-ce:2.11.1
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+      - "8005:8000"
+    volumes:
+      - portainer_data:/data
+    networks:
+      - agent_network
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
 volumes:
   postgres-auth-db:
   postgres-io-db:
+  portainer_data:
 
 networks:
   kong-network:
@@ -131,3 +158,6 @@ networks:
   io-db-network:
   io-db-admin-network:
   business-logic-network:
+  agent_network:
+    driver: overlay
+    attachable: true
