@@ -22,6 +22,7 @@ services:
         constraints: [node.role == manager]
     networks:
       - kong-network
+      - logging
   
   auth-service:
     image: vivianapantazica/ia-ticket-auth-service
@@ -120,6 +121,7 @@ services:
     depends_on:
       - auth-service
       - io-service
+
   agent:
     image: portainer/agent:2.11.1
     volumes:
@@ -147,13 +149,39 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - 3005:3000
+    networks:
+      - logging
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - logging
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
 volumes:
+  grafana-data:
   postgres-auth-db:
   postgres-io-db:
   portainer_data:
 
 networks:
   kong-network:
+  logging:
   auth-db-network:
   io-db-network:
   io-db-admin-network:
